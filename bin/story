@@ -14,5 +14,6 @@ PivotalTracker::Client.token = conf["api-token"]
 
 @stories.each do |story|
   puts "[##{story.id}] #{story.name}"
+  puts "[#Fixes #{story.id}] #{story.name}"
 end
 
