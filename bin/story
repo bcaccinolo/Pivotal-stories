@@ -4,12 +4,13 @@ require "rubygems"
 require "yaml"
 require "pivotal-tracker"
 
-PivotalTracker::Client.token('bc@billetto.dk', 'f1ghtclub')        # Automatically fetch API Token
-PivotalTracker::Client.token = 'c18387a7f6dac7650c5a09ab042f239d'  # Manually set API Token
+conf = YAML::load_file(".pivotal-stories")
 
-@project = PivotalTracker::Project.find(101815)
+PivotalTracker::Client.token = conf["api-token"] 
 
-@stories = @project.stories.all(:mywork => "BC", :state => "started")
+@project = PivotalTracker::Project.find(conf["project-id"])
+
+@stories = @project.stories.all(:mywork => conf["initials"], :state => "started")
 
 @stories.each do |story|
   puts "[##{story.id}] #{story.name}"
