@@ -49,7 +49,7 @@ PivotalTracker::Client.token = conf["api-token"]
       if @stories.size > 1
         puts "You can't update the branch name with more than one story started."
       else
-        story.update :labels => story.labels.sub(/b_[0-9a-zA-Z]+/,"")+",b_#{options[:disp_branch]}"
+        story.update :labels => (story.labels.split(",").delete_if{|e| e =~ /b_[0-9a-zA-Z\-\_]+/} << "b_#{options[:disp_branch]}").join(',')
       end
     end
 
