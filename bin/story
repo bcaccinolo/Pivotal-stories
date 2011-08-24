@@ -1,8 +1,28 @@
-#! /usr/bin/ruby
+#! /usr/bin/ruby 
 
 require "rubygems"
+require 'optparse'
 require "yaml"
 require "pivotal-tracker"
+
+options = {}
+OptionParser.new do |opts|
+opts.banner = "Usage: story [options]"
+
+opts.on("-v", "--version", "Version") do |v|
+  options[:version] = 1
+end
+
+opts.on("-b", "--branch [BRANCH_NAME]", "List the branch of the started stories. With BRANCH_NAME update the branch for the story. ") do |v|
+  options[:disp_branch] = v || 1
+end
+
+opts.on("-l", "--labels", "Labels of the started stories") do |v|
+  options[:disp_labels] = 1
+end
+
+end.parse!
+
 
 conf = YAML::load_file(".pivotal-stories")
 
@@ -13,7 +33,29 @@ PivotalTracker::Client.token = conf["api-token"]
 @stories = @project.stories.all(:mywork => conf["initials"], :state => "started")
 
 @stories.each do |story|
+
+  
+
   puts "[##{story.id}] #{story.name}"
   puts "[Fixes ##{story.id}] #{story.name}"
+
+  if options[:disp_labels]
+    puts "Labels: #{story.labels}"
+  end
+
+  if options[:disp_branch]
+
+    if options[:disp_branch] != 1
+      if @stories.size > 1
+        puts "You can't update the branch name with more than one story started."
+      else
+        story.update :labels => story.labels.sub(/b_[0-9a-zA-Z]+/,"")+",b_#{options[:disp_branch]}"
+      end
+    end
+
+    branches = story.labels.split(',').map{|l| unless (l =~ /^b_/).nil? then l end }.compact.join(',')
+    puts "Branches: #{branches.sub(/b_/,'')}"
+  end
+  puts
 end
 
